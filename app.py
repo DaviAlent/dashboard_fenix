@@ -32,8 +32,12 @@ def build_sidebar():
 def build_main(block, info):
     
     chart_data = pd.DataFrame(info, columns=block)
-    quantidade_erro = len(chart_data[carregar_dados(block)])
-    media = sum(chart_data[carregar_dados(block)]) / quantidade_erro
+    
+    quantidade_erro = len(chart_data[block][1:])
+    
+    chart_data = chart_data.drop(chart_data.index[0], axis=0)
+    chart_data
+    media = sum(chart_data[block]) / quantidade_erro
 
     mygrid = grid(5, 5, 5, 5, 5, 5, vertical_align="top")
     for b in block:
