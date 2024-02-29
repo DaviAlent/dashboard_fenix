@@ -5,6 +5,7 @@ import plotly.express as px
 from datetime import datetime
 from streamlit_extras.metric_cards import style_metric_cards
 from streamlit_extras.grid import grid
+import os
 
 
 info = pd.read_csv("taxaacerto.csv", sep=";", dayfirst=True)
@@ -14,6 +15,28 @@ def carregar_dados():
     dado = pd.read_csv("taxaacerto.csv", sep=";")
     return dado
 
+testesAutoDesaceleracao = []
+testesAutoPilotagem = []
+
+def carregar_todos():
+    pastaAutoDesaceleracao = './testes/AutoDesaceleracao'
+    pastaAutoPilotagem = './testes/AutoPilotagem'
+
+    arquivos_autoDesaceleracao = os.listdir(pastaAutoDesaceleracao)
+    arquivos_autoPilotagem = os.listdir(pastaAutoPilotagem)
+
+    for arquivo_csv in arquivos_autoDesaceleracao:
+        if arquivo_csv.endswith('.csv'):
+            arquivo_csv = pd.read_csv(os.path.join(pastaAutoDesaceleracao, arquivos_autoDesaceleracao))
+            testesAutoDesaceleracao.append(df)
+
+
+    for arquivo_csv in arquivos_autoPilotagem:
+        if arquivo_csv.endswith('.csv'):
+            arquivo_csv = pd.read_csv(os.path.join(pastaAutoPilotagem, arquivos_autoPilotagem))
+            testesAutoPilotagem.append(df)
+
+    
 # controi a barra lateral
 def build_sidebar():
     st.image("images/logofenixvertical.jpeg")
@@ -32,22 +55,26 @@ def build_sidebar():
 def build_main(block, info):
     
     chart_data = pd.DataFrame(info, columns=block)
-    
-    quantidade_erro = len(chart_data[block][1:])
-    
-    chart_data = chart_data.drop(chart_data.index[0], axis=0)
-    chart_data
-    media = sum(chart_data[block]) / quantidade_erro
-
-    mygrid = grid(5, 5, 5, 5, 5, 5, vertical_align="top")
+    media = chart_data[block].median()
+    media
+    mygrid = grid(3, 3, 5, 5, 5, 5, vertical_align="top")
     for b in block:
+        
         c = mygrid.container(border=True)
         c.subheader(b, divider="red")
-        colA, colB, colC = c.columns(3)
-     #   colB.metric(label="Erro", value=(media))
+        colA, colB = c.columns(2)
+        colA.metric(label="Media Acerto", value=(media[b]))
+        
+        colB.metric(label="Testagens", value=(len(chart_data[b])))
 
-    st.subheader('Taxa De Acerto')
-    st.line_chart(chart_data)
+    col1, col2 = st.columns(2, gap='large')
+    with col1:
+        st.subheader('Taxa De Acerto')
+        st.line_chart(chart_data)
+
+    with col2:
+        st.subheader('My Block por Saida')
+
     # st.line_chart(info, x="data")
     # st.dataframe(info)
     # st.line_chart(info)
@@ -63,4 +90,3 @@ if block:
         
     build_main(block, info)
     # st.text(block)
-
